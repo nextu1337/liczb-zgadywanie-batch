@@ -3,7 +3,7 @@
 cls
 setlocal enableDelayedExpansion
 REM wyswietl rekordy
-echo Diff 	     Nick 	 Punkty
+echo Diff 	     Nick 	 Proby
 echo -------------------------------
 call :displayRekordy
 echo -------------------------------
