@@ -2,7 +2,7 @@
 :start
 cls
 setlocal enableDelayedExpansion
-REM wyswietl rekordy
+REM Wyswietl tablice
 echo Diff 	     Nick 	 Proby
 echo -------------------------------
 call :displayRekordy
@@ -11,7 +11,7 @@ echo.
 
 set /p nick=4 literowy nick: 
 
-REM sprawdz czy 4 litery
+REM Sprawdz czy 4 litery (tylko)
 call :nickWalidacja czyWalid "!nick!"
 
 if "!czyWalid!" NEQ "true" (
@@ -21,32 +21,33 @@ if "!czyWalid!" NEQ "true" (
 )
 echo.
 
-REM we daj mu wybrac level
+REM Wyswietl pole wyboru poziomu
 choice /c 123 /m "Wybierz poziom (1 - Easy, 2 - Extra, 3 - Ultra)"
 set wybor=!errorlevel!
 
-REM ogarnij co wybral
+REM Zobacz co zostalo wybrane
 if "!wybor!" EQU "1" set /a max=20
 if "!wybor!" EQU "2" set /a max=50
 if "!wybor!" EQU "3" set /a max=100
 
 echo OK !nick!, twoim zadaniem bedzie wybrac liczbe od 1 do !max!
 
-REM wstepnie wylosuj liczbe
+REM Wstepnie wylosuj liczbe
 call :wylosuj liczba 1 !max!
 
-REM rozpocznij gameplay, funkcja wroci tylko tu jezeli zgadl
+REM Rozpocznij gameplay, funkcja wroci tylko tu jezeli zgadl
 call :gameplay ile !liczba! 1
 cls
 echo No ladnie, zajelo ci to tylko !ile! prob.
 
-REM wyczytaj obecny rekord
+REM Wypisz obecne rekordy
 if "!wybor!" EQU "1" set poziom=Easy.
 if "!wybor!" EQU "2" set poziom=Extra
 if "!wybor!" EQU "3" set poziom=Ultra
 
 call :readRekord highScore !poziom!
 
+REM Sprawdz czy jest to nowy rekord
 if !highScore! LEQ !ile! (
 	echo Niestety, nie jest to nowy rekord. Obecny wynosi !highScore! prob
 	echo Probuj dalej. Kliknij cokolwiek
@@ -56,7 +57,7 @@ if !highScore! LEQ !ile! (
 
 echo Brawo. Wychodzi na to ze jest to nowy rekord. Serdecznie gratuluje wygranej. Poprzedni rekord wynosil !highScore! prob
 
-REM zapisz wynik :D
+REM Zapisz wynik :D
 call :setRekord !poziom! !nick! !ile!
 
 echo Kliknij cokolwiek aby wyjsc z gry
@@ -65,7 +66,13 @@ pause >nul
 endlocal
 goto :eof
 
-
+::
+:: Sprawdza czy nick posiada RÓWNO 4 litery
+:: @param ret return variable
+:: @param nick nazwa uzytkownika
+:: @returns true jezeli nick ma 4 litery (tylko)
+:: @returns false jezeli nick ma wiecej lub mniej (xd)
+::
 :nickWalidacja ret nick
 setlocal enableDelayedExpansion
 	set ret=true
@@ -75,13 +82,26 @@ setlocal enableDelayedExpansion
 endlocal & set %1=%ret%
 goto :eof
 
+::
+:: Funkcja generujaca pseudo-losowa liczbe w danym zakresie
+:: @param ret return variable
+:: @param od jakiej liczby
+:: @param do jakiej liczby
+:: @returns wygenerowana liczbe
+::
 :wylosuj ret od do
 setlocal enableDelayedExpansion
 	set /a res=(!random! %% (%3 - %2)) + %2
 endlocal & set %1=%res%
 goto :eof
 
-
+::
+:: Logika calego gameplayu
+:: @param ileZajelo return variable 
+:: @param doZgadniecia liczba jaka nalezy zgadnac
+:: @param obecnaIloscProb ilosc prob obecna jako ze funkcja jest funkcja rekurencyjna
+:: @returns Ilosc prob jakie zajelo zeby zgadnac
+::
 :gameplay ileZajelo doZgadniecia obecnaIloscProb
 setlocal enableDelayedExpansion
 set liczba=%2
@@ -96,6 +116,9 @@ if !liczba! NEQ !zgad! (
 endlocal & set %1=%ileProb%
 goto :eof
 
+::
+:: Funkcja zajmujaca sie wyswietlaniem rekordow
+::
 :displayRekordy
 setlocal enableDelayedExpansion
 for /F "tokens=*" %%A in (rekordy.txt) do (
@@ -111,6 +134,11 @@ for /F "tokens=*" %%A in (rekordy.txt) do (
 endlocal
 goto :eof
 
+::
+:: Funkcja zajmujaca sie odczytywaniem pojedynczych rekordow
+:: @param return variable
+:: @returns rekord dla danego poziomu
+::
 :readRekord
 setlocal enableDelayedExpansion
 set resF=
@@ -127,6 +155,12 @@ for /F "tokens=*" %%A in (rekordy.txt) do (
 endlocal & set %1=%resF%
 goto :eof
 
+::
+:: Funkcja zajmujaca sie ustawianiem rekordow
+:: @param poziom
+:: @param nick
+:: @param ilosc prob
+::
 :setRekord poziom nick ilosc
 setlocal enableDelayedExpansion
 set res=
@@ -151,7 +185,7 @@ echo !res[1]! > rekordy.txt
 echo !res[2]! >> rekordy.txt
 echo !res[3]! >> rekordy.txt
 
-endlocal & set %1=%resF%
+endlocal
 goto :eof
 
 
